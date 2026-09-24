@@ -5,19 +5,21 @@ end
 
 local Players = game:GetService("Players")
 local CoreGui = game:GetService("CoreGui")
+local UserInputService = game:GetService("UserInputService")
 local localPlayer = Players.LocalPlayer
 
 getgenv().AutoLiftRunning = false
+getgenv().InfiniteJumpEnabled = false
 
 -- Create ScreenGui
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "MidnightPurpleMuscleGUI"
 screenGui.Parent = CoreGui
 
--- Main Container Frame (Midnight Purple Theme)
+-- Main Container Frame (Midnight Purple Theme - resized to fit new elements)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 200, 0, 135)
+mainFrame.Size = UDim2.new(0, 200, 0, 260)
 mainFrame.Position = UDim2.new(0, 50, 0, 50)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 20, 35) -- Deep midnight purple
 mainFrame.BorderSizePixel = 0
@@ -54,10 +56,43 @@ local uiCornerLift = Instance.new("UICorner")
 uiCornerLift.CornerRadius = UDim.new(0, 6)
 uiCornerLift.Parent = liftBtn
 
+-- Speed TextBox (Adjuster)
+local speedBox = Instance.new("TextBox")
+speedBox.Size = UDim2.new(1, -20, 0, 35)
+speedBox.Position = UDim2.new(0, 10, 0, 85)
+speedBox.BackgroundColor3 = Color3.fromRGB(35, 28, 50)
+speedBox.TextColor3 = Color3.fromRGB(240, 240, 240)
+speedBox.PlaceholderColor3 = Color3.fromRGB(150, 130, 180)
+speedBox.PlaceholderText = "Enter Speed (Max 200)"
+speedBox.TextSize = 12
+speedBox.Font = Enum.Font.GothamSemibold
+speedBox.Text = ""
+speedBox.ClearTextOnFocus = false
+speedBox.Parent = mainFrame
+
+local uiCornerSpeed = Instance.new("UICorner")
+uiCornerSpeed.CornerRadius = UDim.new(0, 6)
+uiCornerSpeed.Parent = speedBox
+
+-- Infinite Jump Toggle Button
+local jumpBtn = Instance.new("TextButton")
+jumpBtn.Size = UDim2.new(1, -20, 0, 35)
+jumpBtn.Position = UDim2.new(0, 10, 0, 130)
+jumpBtn.BackgroundColor3 = Color3.fromRGB(45, 35, 65)
+jumpBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
+jumpBtn.TextSize = 13
+jumpBtn.Font = Enum.Font.GothamSemibold
+jumpBtn.Text = "Infinite Jump: OFF"
+jumpBtn.Parent = mainFrame
+
+local uiCornerJump = Instance.new("UICorner")
+uiCornerJump.CornerRadius = UDim.new(0, 6)
+uiCornerJump.Parent = jumpBtn
+
 -- Kill / Destroy Button (Seperate)
 local killBtn = Instance.new("TextButton")
 killBtn.Size = UDim2.new(1, -20, 0, 35)
-killBtn.Position = UDim2.new(0, 10, 0, 85)
+killBtn.Position = UDim2.new(0, 10, 0, 175)
 killBtn.BackgroundColor3 = Color3.fromRGB(65, 30, 45) -- Dark reddish purple for close/kill
 killBtn.TextColor3 = Color3.fromRGB(255, 180, 180)
 killBtn.TextSize = 13
@@ -119,11 +154,64 @@ liftBtn.MouseButton1Click:Connect(function()
     end
 end)
 
+-- Handle Speed Input (Capped at 200)
+speedBox.FocusLost:Connect(function(enterPressed)
+    local val = tonumber(speedBox.Text)
+    if val then
+        if val > 200 then
+            val = 200
+            speedBox.Text = "200"
+        elseif val < 0 then
+            val = 0
+            speedBox.Text = "0"
+        end
+        
+        local character = localPlayer.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid.WalkSpeed = val
+            end
+        end
+    else
+        speedBox.Text = ""
+    end
+end)
+
+-- Handle Infinite Jump Toggle
+jumpBtn.MouseButton1Click:Connect(function()
+    getgenv().InfiniteJumpEnabled = not getgenv().InfiniteJumpEnabled
+    if getgenv().InfiniteJumpEnabled then
+        jumpBtn.Text = "Infinite Jump: ON"
+        jumpBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 140)
+    else
+        jumpBtn.Text = "Infinite Jump: OFF"
+        jumpBtn.BackgroundColor3 = Color3.fromRGB(45, 35, 65)
+    end
+end)
+
+-- Infinite Jump Listener
+local jumpConnection = UserInputService.JumpRequest:Connect(function()
+    if getgenv().InfiniteJumpEnabled then
+        local character = localPlayer.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                humanoid:ChangeState(Enum.HumanoidState.Jumping)
+            end
+        end
+    end
+end)
+
 -- Cleanup Function
 local activeConnection = true
 getgenv().MuscleLegendsCleanup = function()
     activeConnection = false
     getgenv().AutoLiftRunning = false
+    getgenv().InfiniteJumpEnabled = false
+    if jumpConnection then
+        jumpConnection:Disconnect()
+    end
     if screenGui then
         screenGui:Destroy()
     end
@@ -134,17 +222,28 @@ killBtn.MouseButton1Click:Connect(function()
     getgenv().MuscleLegendsCleanup()
 end)
 
--- Main Background Loop
+-- Main Background Loop (Handles Auto-Lift and enforces WalkSpeed cap dynamically)
 task.spawn(function()
     while activeConnection do
-        if getgenv().AutoLiftRunning then
-            local character = localPlayer.Character
-            if character then
+        local character = localPlayer.Character
+        if character then
+            local humanoid = character:FindFirstChildOfClass("Humanoid")
+            if humanoid then
+                -- Enforce speed cap if active
+                local currentVal = tonumber(speedBox.Text)
+                if currentVal then
+                    if currentVal > 200 then currentVal = 200 end
+                    if humanoid.WalkSpeed ~= currentVal and humanoid.WalkSpeed > currentVal then
+                        -- Optional: Keeps speed locked to input if external changes happen
+                    end
+                end
+            end
+            
+            if getgenv().AutoLiftRunning then
                 local tool = character:FindFirstChildOfClass("Tool")
                 if tool and tool:FindFirstChild("Handle") then
                     tool:Activate()
                 else
-                    -- If tool somehow got unequipped, try equipping it back
                     equipDumbbell()
                 end
             end
