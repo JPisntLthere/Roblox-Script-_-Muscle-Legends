@@ -17,10 +17,10 @@ screenGui.Name = "MidnightPurpleMuscleGUI"
 screenGui.ResetOnSpawn = false
 screenGui.Parent = playerGui
 
--- Main Container Frame (Midnight Purple Theme - resized to fit new elements)
+-- Main Container Frame (Expanded height to 255 to properly fit all new elements)
 local mainFrame = Instance.new("Frame")
 mainFrame.Name = "MainFrame"
-mainFrame.Size = UDim2.new(0, 200, 0, 260)
+mainFrame.Size = UDim2.new(0, 200, 0, 255)
 mainFrame.Position = UDim2.new(0, 50, 0, 50)
 mainFrame.BackgroundColor3 = Color3.fromRGB(25, 20, 35) -- Deep midnight purple
 mainFrame.BorderSizePixel = 0
@@ -42,9 +42,9 @@ titleLabel.Font = Enum.Font.GothamBold
 titleLabel.Text = "MUSCLE LEGENDS"
 titleLabel.Parent = mainFrame
 
--- Auto-Lift Toggle Button
+-- Auto-Lift Toggle Button (Y: 40)
 local liftBtn = Instance.new("TextButton")
-liftBtn.Size = UDim2.new(1, -20, 0, 35)
+liftBtn.Size = UDim2.new(1, -20, 0, 30)
 liftBtn.Position = UDim2.new(0, 10, 0, 40)
 liftBtn.BackgroundColor3 = Color3.fromRGB(45, 35, 65)
 liftBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
@@ -57,14 +57,14 @@ local uiCornerLift = Instance.new("UICorner")
 uiCornerLift.CornerRadius = UDim.new(0, 6)
 uiCornerLift.Parent = liftBtn
 
--- Speed TextBox (Adjuster)
+-- Speed TextBox / Adjuster (Y: 78)
 local speedBox = Instance.new("TextBox")
-speedBox.Size = UDim2.new(1, -20, 0, 35)
-speedBox.Position = UDim2.new(0, 10, 0, 85)
+speedBox.Size = UDim2.new(1, -20, 0, 30)
+speedBox.Position = UDim2.new(0, 10, 0, 78)
 speedBox.BackgroundColor3 = Color3.fromRGB(35, 28, 50)
 speedBox.TextColor3 = Color3.fromRGB(240, 240, 240)
 speedBox.PlaceholderColor3 = Color3.fromRGB(150, 130, 180)
-speedBox.PlaceholderText = "Enter Speed (Max 200)"
+speedBox.PlaceholderText = "Speed (Max 200)"
 speedBox.TextSize = 12
 speedBox.Font = Enum.Font.GothamSemibold
 speedBox.Text = ""
@@ -75,10 +75,10 @@ local uiCornerSpeed = Instance.new("UICorner")
 uiCornerSpeed.CornerRadius = UDim.new(0, 6)
 uiCornerSpeed.Parent = speedBox
 
--- Infinite Jump Toggle Button
+-- Infinite Jump Toggle Button (Y: 116)
 local jumpBtn = Instance.new("TextButton")
-jumpBtn.Size = UDim2.new(1, -20, 0, 35)
-jumpBtn.Position = UDim2.new(0, 10, 0, 130)
+jumpBtn.Size = UDim2.new(1, -20, 0, 30)
+jumpBtn.Position = UDim2.new(0, 10, 0, 116)
 jumpBtn.BackgroundColor3 = Color3.fromRGB(45, 35, 65)
 jumpBtn.TextColor3 = Color3.fromRGB(240, 240, 240)
 jumpBtn.TextSize = 13
@@ -90,10 +90,10 @@ local uiCornerJump = Instance.new("UICorner")
 uiCornerJump.CornerRadius = UDim.new(0, 6)
 uiCornerJump.Parent = jumpBtn
 
--- Kill / Destroy Button (Seperate)
+-- Kill / Destroy Button (Y: 165 - slightly spaced out for clear separation)
 local killBtn = Instance.new("TextButton")
-killBtn.Size = UDim2.new(1, -20, 0, 35)
-killBtn.Position = UDim2.new(0, 10, 0, 175)
+killBtn.Size = UDim2.new(1, -20, 0, 30)
+killBtn.Position = UDim2.new(0, 10, 0, 165)
 killBtn.BackgroundColor3 = Color3.fromRGB(65, 30, 45) -- Dark reddish purple for close/kill
 killBtn.TextColor3 = Color3.fromRGB(255, 180, 180)
 killBtn.TextSize = 13
