@@ -4,17 +4,18 @@ if getgenv().MuscleLegendsCleanup then
 end
 
 local Players = game:GetService("Players")
-local CoreGui = game:GetService("CoreGui")
 local UserInputService = game:GetService("UserInputService")
 local localPlayer = Players.LocalPlayer
+local playerGui = localPlayer:WaitForChild("PlayerGui")
 
 getgenv().AutoLiftRunning = false
 getgenv().InfiniteJumpEnabled = false
 
--- Create ScreenGui
+-- Create ScreenGui (Using PlayerGui to ensure visibility)
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "MidnightPurpleMuscleGUI"
-screenGui.Parent = CoreGui
+screenGui.ResetOnSpawn = false
+screenGui.Parent = playerGui
 
 -- Main Container Frame (Midnight Purple Theme - resized to fit new elements)
 local mainFrame = Instance.new("Frame")
@@ -109,7 +110,6 @@ local function equipDumbbell()
     local character = localPlayer.Character
     local backpack = localPlayer:FindFirstChildOfClass("Backpack")
     
-    -- Check if already holding a tool
     if character and character:FindFirstChildOfClass("Tool") then
         return
     end
@@ -119,7 +119,6 @@ local function equipDumbbell()
         if humanoid then
             for _, item in ipairs(backpack:GetChildren()) do
                 if item:IsA("Tool") then
-                    -- Search for "dumbbell" or "weight" in the tool name (case-insensitive)
                     local nameLower = string.lower(item.Name)
                     if string.find(nameLower, "dumbbell") or string.find(nameLower, "weight") then
                         humanoid:EquipTool(item)
@@ -128,7 +127,6 @@ local function equipDumbbell()
                 end
             end
             
-            -- Fallback: If no specific dumbbell is found, just equip the first available tool
             if not character:FindFirstChildOfClass("Tool") then
                 for _, item in ipairs(backpack:GetChildren()) do
                     if item:IsA("Tool") then
@@ -146,8 +144,8 @@ liftBtn.MouseButton1Click:Connect(function()
     getgenv().AutoLiftRunning = not getgenv().AutoLiftRunning
     if getgenv().AutoLiftRunning then
         liftBtn.Text = "Auto-Lift: ON"
-        liftBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 140) -- Brighter active purple
-        equipDumbbell() -- Try to pull out the dumbbell immediately when turned on
+        liftBtn.BackgroundColor3 = Color3.fromRGB(90, 50, 140)
+        equipDumbbell()
     else
         liftBtn.Text = "Auto-Lift: OFF"
         liftBtn.BackgroundColor3 = Color3.fromRGB(45, 35, 65)
@@ -217,28 +215,16 @@ getgenv().MuscleLegendsCleanup = function()
     end
 end
 
--- Kill Button Action (Wipes loop and UI completely)
+-- Kill Button Action
 killBtn.MouseButton1Click:Connect(function()
     getgenv().MuscleLegendsCleanup()
 end)
 
--- Main Background Loop (Handles Auto-Lift and enforces WalkSpeed cap dynamically)
+-- Main Background Loop
 task.spawn(function()
     while activeConnection do
         local character = localPlayer.Character
         if character then
-            local humanoid = character:FindFirstChildOfClass("Humanoid")
-            if humanoid then
-                -- Enforce speed cap if active
-                local currentVal = tonumber(speedBox.Text)
-                if currentVal then
-                    if currentVal > 200 then currentVal = 200 end
-                    if humanoid.WalkSpeed ~= currentVal and humanoid.WalkSpeed > currentVal then
-                        -- Optional: Keeps speed locked to input if external changes happen
-                    end
-                end
-            end
-            
             if getgenv().AutoLiftRunning then
                 local tool = character:FindFirstChildOfClass("Tool")
                 if tool and tool:FindFirstChild("Handle") then
